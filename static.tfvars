@@ -2,8 +2,8 @@
 
 # Required:
 # hostname = ""
-# loggingbucket = ""
 # ssl_cert_arn = ""
+# logging_bucket = ""
 
 # Optional:
 # aws_region = ""

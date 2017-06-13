@@ -1,4 +1,6 @@
-# Static Site Deployment to Cloudfront+S3
+# SeaLane
+
+## Static Site Deployment to Cloudfront+S3
 
 This is a template for quickly setting up and deploying a static web site to Amazon S3 + Cloudfront CDN. (See [S3 pricing](https://aws.amazon.com/s3/pricing/); [Cloudfront pricing](https://aws.amazon.com/cloudfront/pricing/))
 
@@ -9,11 +11,14 @@ Assumptions:
 - [Terraform](https://www.terraform.io/intro/getting-started/install.html) is installed
 
 Basic steps:
+
 0. Request a free SSL cert from [AWS Certificate Manager](https://console.aws.amazon.com/acm/home), or upload one.
 1. Review the terraform configuration, static.tf, and make changes as needed.
 2. Populate your local [AWS credentials](#aws-credentials) file with an IAM user having access to S3, Cloudfront, and CertificateManager
 3. Run [terraform commands](#terraform) to provision or update AWS infrastructure
-4. [Deploy](#deploy) content using aws-s3-sync
+4. [Deploy](#content-deployment) content using aws-s3-sync
+
+# Infrastructure
 
 ## AWS SSL Certs
 
@@ -45,7 +50,7 @@ When running `apply` or `show`, you'll be prompted to define any needed variable
 $ terraform plan -var-file=static.tfvars
 ```
 
-## Deploy
+# Content Deployment
 
 ```
 $ aws s3 sync static s3://www.example.com [--profile default] --exclude *.DS_Store --delete
@@ -55,6 +60,8 @@ $ aws s3 sync static s3://www.example.com [--profile default] --exclude *.DS_Sto
 
 - [Cache invalidations for web distributions](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html)
 - [CLI reference](http://docs.aws.amazon.com/cli/latest/reference/cloudfront/create-invalidation.html)
+
+---
 
 ## Troubleshooting
 

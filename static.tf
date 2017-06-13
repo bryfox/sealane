@@ -19,7 +19,7 @@ variable "ssl_cert_arn" {
 EOS
 }
 
-variable "loggingbucket" {
+variable "logging_bucket" {
   description = <<EOS
     S3 Bucket for log storage
 
@@ -76,9 +76,10 @@ POLICY
 
 # S3 logs
 resource "aws_s3_bucket" "websitelogs" {
-  count  = "${var.loggingbucket == "" ? 0 : 1}"
-
-  bucket = "${var.loggingbucket}"
+  # Skip this resource if logging_bucket is empty.
+  # Note: you'll also need to remove logging_config from the cloudfront resource.
+  count  = "${var.logging_bucket == "" ? 0 : 1}"
+  bucket = "${var.logging_bucket}"
   acl    = "private"
 
   tags {
