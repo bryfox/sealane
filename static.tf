@@ -37,6 +37,8 @@ variable "environment_name" { default = "production" description = "For tagging"
 
 # DNS config: short times for initial development
 variable "use_short_ttl" { default = true type = "" description = "Probably set to false once initial development stabilizes" }
+# gzip for Cloudfront
+variable "enable_gzip" { default = true }
 
 provider "aws" {
   region  = "${var.aws_region}"
@@ -141,6 +143,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "website_bucket_origin"
+    compress         = "${var.enable_gzip}"
 
     # Static site: forward nothing
     forwarded_values {
