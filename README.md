@@ -1,6 +1,6 @@
 # SeaLane
 
-## Static Site Deployment to Cloudfront+S3
+## Static Site bootstrapping on Cloudfront+S3
 
 This is a template for quickly setting up and deploying a static web site to Amazon S3 + Cloudfront CDN. (See [S3 pricing](https://aws.amazon.com/s3/pricing/); [Cloudfront pricing](https://aws.amazon.com/cloudfront/pricing/))
 
@@ -15,6 +15,7 @@ Basic steps:
 0. Request a free SSL cert from [AWS Certificate Manager](https://console.aws.amazon.com/acm/home), or upload one.
 1. Review the terraform configuration, static.tf, and make changes as needed.
 2. Populate your local [AWS credentials](#aws-credentials) file with an IAM user having access to S3, Cloudfront, and CertificateManager
+3. [Configure variables as needed](#configuration)
 3. Run [terraform commands](#terraform) to provision or update AWS infrastructure
 4. [Deploy](#content-deployment) content using aws-s3-sync
 
@@ -44,10 +45,16 @@ $ terraform apply   # create resources
 $ terraform show    # show state
 ```
 
-When running `apply` or `show`, you'll be prompted to define any needed variables. You can pre-populate variables in a `tfvars` file instead, and use that with the configuration:
+## Configuration
+
+When running `apply` or `show`, you'll be prompted to define any needed variables.
+
+To persist variables, populate and rename `terraform.tfvars.example` to `terraform.tfvars`. Terraform will automatically read vars from this file, and git will ignore it.
+
+You could also specify additional vars files for Terraform:
 
 ```
-$ terraform plan -var-file=static.tfvars
+$ terraform plan -var-file=production.tfvars
 ```
 
 # Content Deployment

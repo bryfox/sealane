@@ -1,3 +1,5 @@
+# Rename to terraform.tfvars to have Terraform automatically load variables.
+
 # See descriptions in static.tf
 
 # Required:
