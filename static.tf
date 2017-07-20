@@ -47,22 +47,22 @@ provider "aws" {
 }
 
 # S3 Static Site
+# The bucket policy allows read access to contents, even with the private ACL.
+# Changing the ACL to "public-read" would also allow anyone to list the bucket contents.
 resource "aws_s3_bucket" "website" {
   bucket = "${var.hostname}"
-  acl    = "public-read"
+  acl    = "private"
 
   policy = <<POLICY
 {
   "Version":"2012-10-17",
   "Statement":[{
     "Sid":"PublicReadForGetBucketObjects",
-        "Effect":"Allow",
-      "Principal": "*",
-      "Action":"s3:GetObject",
-      "Resource":["arn:aws:s3:::${var.hostname}/*"
-      ]
-    }
-  ]
+    "Effect":"Allow",
+    "Principal": "*",
+    "Action":["s3:GetObject"],
+    "Resource":["arn:aws:s3:::${var.hostname}/*"]
+  }]
 }
 POLICY
 
