@@ -113,7 +113,7 @@ resource "aws_cloudfront_distribution" "cdn" {
       origin_protocol_policy = "http-only"
       http_port              = 80
       https_port             = 443
-      origin_ssl_protocols   = ["TLSv1.2", "TLSv1.1", "TLSv1"]
+      origin_ssl_protocols   = ["TLSv1.2", "TLSv1.1"]
     }
   }
 
@@ -177,7 +177,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     # Created in web console; no terraform support yet
     acm_certificate_arn = "${var.ssl_cert_arn}"
     ssl_support_method = "sni-only"
-    # TLSv1 required for SNI
-    minimum_protocol_version = "TLSv1"
+    minimum_protocol_version = "TLSv1.1_2016"
   }
 }
