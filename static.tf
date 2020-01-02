@@ -66,7 +66,7 @@ resource "aws_s3_bucket" "website" {
 }
 POLICY
 
-  tags {
+  tags = {
     Environment = "${var.environment_name}"
   }
 
@@ -84,7 +84,7 @@ resource "aws_s3_bucket" "websitelogs" {
   bucket = "${var.logging_bucket}"
   acl    = "private"
 
-  tags {
+  tags = {
     Environment = "${var.environment_name}"
   }
 }
@@ -169,7 +169,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  tags {
+  tags = {
     Environment = "${var.environment_name}"
   }
 
