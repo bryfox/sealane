@@ -31,26 +31,53 @@ variable "logging_bucket" {
 EOS
 }
 
-variable "aws_region"       { default = "us-east-1" description = "S3 buckets are region-specific" }
-variable "aws_cli_profile"  { default = "default" description = "Profile name in .aws/credentials" }
-variable "environment_name" { default = "production" description = "For tagging" }
+variable "aws_region" {
+  default = "us-east-1"
+  description = "S3 buckets are region-specific"
+}
+
+variable "aws_cli_profile" {
+  default = "default"
+  description = "Profile name in .aws/credentials"
+}
+
+variable "environment_name" {
+  default = "production"
+  description = "For tagging"
+}
 
 # DNS config: short times for initial development
-variable "use_short_ttl" { default = true type = "" description = "Probably set to false once initial development stabilizes" }
+variable "use_short_ttl" {
+  default = true
+  type = bool
+  description = "Probably set to false once initial development stabilizes"
+}
+
 # gzip for Cloudfront
-variable "enable_gzip" { default = true }
+variable "enable_gzip" {
+  default = true
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
 
 provider "aws" {
-  region  = "${var.aws_region}"
+  region  = var.aws_region
   # load creds from ~/.aws/credentials, and use ${profile} profile
-  profile = "${var.aws_cli_profile}"
+  profile = var.aws_cli_profile
 }
 
 # S3 Static Site
 # The bucket policy allows read access to contents, even with the private ACL.
 # Changing the ACL to "public-read" would also allow anyone to list the bucket contents.
 resource "aws_s3_bucket" "website" {
-  bucket = "${var.hostname}"
+  bucket = var.hostname
   acl    = "private"
 
   policy = <<POLICY
@@ -67,7 +94,7 @@ resource "aws_s3_bucket" "website" {
 POLICY
 
   tags = {
-    Environment = "${var.environment_name}"
+    Environment = var.environment_name
   }
 
   website {
@@ -77,15 +104,13 @@ POLICY
 }
 
 # S3 logs
+# Note: If you don't want logging, you'll also need to remove logging_config from the cloudfront resource.
 resource "aws_s3_bucket" "websitelogs" {
-  # Skip this resource if logging_bucket is empty.
-  # Note: you'll also need to remove logging_config from the cloudfront resource.
-  count  = "${var.logging_bucket == "" ? 0 : 1}"
-  bucket = "${var.logging_bucket}"
+  bucket = var.logging_bucket
   acl    = "private"
 
   tags = {
-    Environment = "${var.environment_name}"
+    Environment = var.environment_name
   }
 }
 
@@ -95,7 +120,7 @@ resource "aws_s3_bucket" "websitelogs" {
 # - http internally
 # - support index documents at all levels (subdirectories)
 resource "aws_cloudfront_distribution" "cdn" {
-  depends_on = ["aws_s3_bucket.website"]
+  depends_on = [aws_s3_bucket.website]
 
   origin {
     origin_id   = "website_bucket_origin"
@@ -119,7 +144,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "${var.hostname}"
+  comment             = var.hostname
 
   # Probably don't need this with origin in web backend (not s3) mode
   default_root_object = "index.html"
@@ -133,17 +158,17 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   logging_config {
     include_cookies = false
-    bucket          = "${aws_s3_bucket.websitelogs.bucket_domain_name}"
-    prefix          = "${var.hostname}"
+    bucket          = aws_s3_bucket.websitelogs.bucket_domain_name
+    prefix          = var.hostname
   }
 
-  aliases = ["${var.hostname}"]
+  aliases = [var.hostname]
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "website_bucket_origin"
-    compress         = "${var.enable_gzip}"
+    compress         = var.enable_gzip
 
     # Static site: forward nothing
     forwarded_values {
@@ -155,9 +180,9 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
 
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = "${var.use_short_ttl ? 0 : 0 }"
-    default_ttl            = "${var.use_short_ttl ? 300 : 3600 }"
-    max_ttl                = "${var.use_short_ttl ? 300 : 86400 }"
+    min_ttl                = var.use_short_ttl ? 0 : 0
+    default_ttl            = var.use_short_ttl ? 300 : 3600
+    max_ttl                = var.use_short_ttl ? 300 : 86400
   }
 
   # [cheapest pricing is 100](https://aws.amazon.com/cloudfront/pricing/)
@@ -170,12 +195,12 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   tags = {
-    Environment = "${var.environment_name}"
+    Environment = var.environment_name
   }
 
   viewer_certificate {
     # Created in web console; no terraform support yet
-    acm_certificate_arn = "${var.ssl_cert_arn}"
+    acm_certificate_arn = var.ssl_cert_arn
     ssl_support_method = "sni-only"
     minimum_protocol_version = "TLSv1.1_2016"
   }
