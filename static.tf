@@ -107,7 +107,7 @@ POLICY
 # Note: If you don't want logging, you'll also need to remove logging_config from the cloudfront resource.
 resource "aws_s3_bucket" "websitelogs" {
   bucket = var.logging_bucket
-  acl    = "private"
+  acl    = "log-delivery-write"
 
   tags = {
     Environment = var.environment_name
