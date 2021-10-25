@@ -101,6 +101,14 @@ POLICY
     index_document = "index.html"
     error_document = "404.html"
   }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 # S3 logs
@@ -111,6 +119,14 @@ resource "aws_s3_bucket" "websitelogs" {
 
   tags = {
     Environment = var.environment_name
+  }
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
   }
 }
 
